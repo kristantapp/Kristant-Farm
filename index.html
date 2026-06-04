@@ -271,7 +271,7 @@ Mohon segera diproses`;
     }
 
     // ===== FUNGSI KIRIM KE PEMBELI VIA FONNTE =====
-    async function kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan) {
+    async function kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan, tanggal) {
       // Gabung dengan "62" untuk nomor lengkap
       const nomorWALengkap = '+62' + nomorWAPembeli;
       
@@ -282,7 +282,7 @@ Terima kasih telah memesan di Kristant Farm! ✨
 📦 *Detail Pesanan Anda:*
 • Produk: ${jenis}
 • Jumlah: ${jumlah} ${satuan}
-• Tanggal Pesanan:* ${tanggal}
+• Tanggal Pesanan: ${tanggal}
 
 Kami akan segera memproses pesanan Anda.
 Silakan tunggu konfirmasi lebih lanjut.
