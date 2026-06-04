@@ -202,16 +202,18 @@
     }
 
     // ===== FUNGSI KIRIM KE PEMILIK VIA FONNTE =====
-    async function kirimNotifikasiKePemilik(nama, jenis, jumlah, satuan, tanggal) {
-      const message = `*🎉 ADA PESANAN BARU! 🎉*
+    async function kirimNotifikasiKePemilik(nama, jenis, jumlah, satuan, tanggal, nomorWAPembeli) {
+      const nomorWADisplay = nomorWAPembeli && nomorWAPembeli.trim() !== '' ? nomorWAPembeli : '-';
+      
+      const message = `*🎉 KRISTANT FARM, ADA PESANAN BARU! 🎉*
 
 *Nama Pemesan:* ${nama}
+*Nomor WA Pembeli:* ${nomorWADisplay}
 *Jenis Produk:* ${jenis}
 *Jumlah:* ${jumlah} ${satuan}
 *Tanggal Pesanan:* ${tanggal}
 
----
-Silakan proses pesanan ini. Terima kasih!`;
+Harap segera diproses`;
 
       try {
         const response = await fetch(FONNTE_API, {
@@ -245,11 +247,15 @@ Terima kasih telah memesan di Kristant Farm! ✨
 📦 *Detail Pesanan Anda:*
 • Produk: ${jenis}
 • Jumlah: ${jumlah} ${satuan}
+• Tanggal Pesanan:* ${tanggal}
 
 Kami akan segera memproses pesanan Anda.
 Silakan tunggu konfirmasi lebih lanjut.
+Atau lihat di https://kristant-farm.vercel.app/
 
-Terima kasih! 🙏`;
+Terima kasih! 🙏
+
+Di kirim oleh Kristant Farm`;
 
       try {
         const response = await fetch(FONNTE_API, {
@@ -541,7 +547,8 @@ Terima kasih! 🙏`;
         });
 
         // 2. KIRIM NOTIFIKASI KE PEMILIK VIA FONNTE (SELALU DIKIRIM)
-        await kirimNotifikasiKePemilik(nama, jenis, jumlah, satuan, tanggalLokal);
+        // Sekarang mengirim nomorWAPembeli juga
+        await kirimNotifikasiKePemilik(nama, jenis, jumlah, satuan, tanggalLokal, nomorWAPembeli);
 
         // 3. KIRIM NOTIFIKASI KE PEMBELI VIA FONNTE (HANYA JIKA ADA NOMOR)
         if (nomorWAPembeli && nomorWAPembeli !== '') {
