@@ -159,10 +159,10 @@
       </div>
       <div><label for="satuan" class="block text-sm font-semibold text-gray-700 mb-2">Satuan</label> <input type="text" id="satuan" readonly class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600" placeholder="Otomatis terisi">
       </div>
-      <div><label for="nomorWAPembeli" class="block text-sm font-semibold text-gray-700 mb-2">Nomor WhatsApp Pembeli <span class="text-gray-500 text-xs">(Opsional)</span></label>
+      <div><label for="nomorWAPembeli" class="block text-sm font-semibold text-gray-700 mb-2">Nomor WA<span class="text-gray-500 text-xs">(Opsional)</span></label>
       <div class="input-with-prefix">
         <span class="input-prefix">+62</span>
-        <input type="tel" id="nomorWAPembeli" class="w-full" placeholder="Contoh: 89628917804 - kosongkan jika tidak perlu">
+        <input type="tel" id="nomorWAPembeli" class="w-full" placeholder="Contoh: 81234567890 - kosongkan jika tidak perlu">
       </div>
       </div>
       <button type="submit" id="submitBtn" class="w-full py-4 rounded-xl font-bold text-white text-lg transition-all duration-300 shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> <span id="submitBtnText">✅ Kirim Pesanan</span> <span id="submitBtnSpinner" class="spinner hidden mx-auto"></span> </button>
@@ -273,7 +273,7 @@ Mohon segera diproses`;
     // ===== FUNGSI KIRIM KE PEMBELI VIA FONNTE =====
     async function kirimNotifikasiKePembeli(nomorWA, nama, jenis, jumlah, satuan) {
       // Gabung dengan "62" untuk nomor lengkap
-      const nomorWALengkap = '62' + nomorWA;
+      const nomorWALengkap = '+62' + nomorWA;
       
       const message = `Halo ${nama}! 👋
 
@@ -586,9 +586,9 @@ Di kirim oleh Kristant Farm`;
         // 3. KIRIM NOTIFIKASI KE PEMBELI VIA FONNTE (HANYA JIKA ADA NOMOR)
         if (nomorWAPembeli && nomorWAPembeli !== '') {
           await kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan);
-          showToast('Pesanan berhasil! Notifikasi dikirim ke Anda & pembeli ✅', 'success');
+          showToast('Pesanan berhasil! Notifikasi dikirim ke Kristant Farm & Anda ✅', 'success');
         } else {
-          showToast('Pesanan berhasil! Notifikasi dikirim ke Anda ✅', 'success');
+          showToast('Pesanan berhasil! Notifikasi dikirim ke Kristant Farm ✅', 'success');
         }
 
         document.getElementById('orderForm').reset();
