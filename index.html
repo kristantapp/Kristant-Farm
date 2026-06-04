@@ -240,7 +240,7 @@
       const message = `*🎉ADA PESANAN BARU!🎉*
 
 *Nama Pemesan:* ${nama}
-*Nomor WA Pembeli:* ${nomorWADisplay}
+*Nomor WA:* ${nomorWADisplay}
 *Jenis Produk:* ${jenis}
 *Jumlah:* ${jumlah} ${satuan}
 *Tanggal Pesanan:* ${tanggal}
@@ -585,7 +585,7 @@ Di kirim oleh Kristant Farm`;
 
         // 3. KIRIM NOTIFIKASI KE PEMBELI VIA FONNTE (HANYA JIKA ADA NOMOR)
         if (nomorWAPembeli && nomorWAPembeli !== '') {
-          await kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan);
+          await kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan, tanggalLokal);
           showToast('Pesanan berhasil! Notifikasi dikirim ke Kristant Farm & Anda ✅', 'success');
         } else {
           showToast('Pesanan berhasil! Notifikasi dikirim ke Kristant Farm ✅', 'success');
