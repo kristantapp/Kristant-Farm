@@ -243,7 +243,7 @@
 *Nomor WA:* ${nomorWADisplay}
 *Jenis Produk:* ${jenis}
 *Jumlah:* ${jumlah} ${satuan}
-*Tanggal Pesanan:* ${tanggal}
+*Tanggal Pesan:* ${tanggal}
 
 Mohon segera diproses`;
 
@@ -275,21 +275,22 @@ Mohon segera diproses`;
       // Gabung dengan "62" untuk nomor lengkap
       const nomorWALengkap = '+62' + nomorWAPembeli;
       
-      const message = `Halo ${nama}! 👋
+      const message = `*Halo ${nama}!* 👋
 
-Terima kasih telah memesan di Kristant Farm! ✨
+Terima kasih telah memesan di 
+Kristant Farm! ✨
 
-📦 *Detail Pesanan Anda:*
-• Produk: ${jenis}
-• Jumlah: ${jumlah} ${satuan}
-• Tanggal Pesanan: ${tanggal}
+*Detail Pesanan Anda:*
+👉 Produk: ${jenis}
+👉 Jumlah: ${jumlah} ${satuan}
+👉 Tanggal Pesan: ${tanggal}
 
-Kami akan segera memproses pesanan Anda.
-Silakan tunggu konfirmasi lebih lanjut.
-atau lihat di https://kristant-farm.vercel.app/
-Terima kasih! 🙏
-
-Di kirim oleh Kristant Farm`;
+Pesanan Anda segera kami proses.
+Silakan tunggu konfirmasi lebih lanjut atau lihat di:
+https://kristant-farm.vercel.app/
+Terima kasih!
+🙏
+*Kristant Farm*`;
 
       try {
         const response = await fetch(FONNTE_API, {
