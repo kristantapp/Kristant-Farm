@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Pemesanan</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Playfair+Display:wght@700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid #10b981;
+      width: 24px;
+      height: 24px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-proses {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-selesai {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+
+
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 0;">
+  <div class="w-full min-h-full py-8 px-4">
+   <div class="max-w-6xl mx-auto"><!-- Header -->
+    <div class="text-center mb-8">
+     <div class="flex items-center justify-center gap-4"><img src="https://drive.google.com/thumbnail?id=1eOOPqlPFR0Lg2DN-0dv54wA_rVcaPheT" alt="Logo Kristant Farm" loading="lazy" onerror="this.alt='🐔'; this.style.fontSize='48px'; this.style.height='auto';" class="h-16 w-16 md:h-20 md:w-20 rounded-full object-cover border border-white shadow-lg">
+      <h1 class="text-4xl md:text-5xl font-bold text-white" style="font-family: 'Playfair Display', serif; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Kristant Farm</h1>
+     </div>
+    </div><!-- Info Card -->
+    <div class="glass-effect rounded-3xl shadow-2xl p-6 md:p-8 mb-8">
+     <h2 id="infoTitle" class="text-lg font-bold mb-2" style="color: #667eea;">📋 Info Produk</h2>
+     <div id="infoContent" class="text-gray-700 text-sm leading-snug space-y-1">
+      <p class="font-medium">Produk yang dijual adalah produk dari Ayam Kampung, yaitu telur, daging ayam utuh, dan DOC.</p>
+     </div><!-- Stok Barang -->
+     <div class="mt-4 pt-4 border-t border-gray-300">
+      <div class="flex items-center justify-between mb-2">
+       <h3 class="text-sm font-bold text-gray-800">📦 Stok Tersedia:</h3><button id="refreshStockBtn" class="px-2 py-1 rounded-lg font-semibold text-white text-xs transition-all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 🔄 Refresh </button>
+      </div>
+      <div id="stockInfo" class="space-y-1">
+       <div class="text-center py-2 text-gray-500 text-xs">
+        <div class="spinner mx-auto mb-1" style="width: 16px; height: 16px; border-width: 2px;"></div> Memuat stok...
+       </div>
+      </div>
+     </div>
+    </div><!-- Form Card -->
+    <div class="glass-effect rounded-3xl shadow-2xl p-6 md:p-8 mb-8">
+     <h2 class="text-lg font-bold mb-5" style="color: #667eea;">📝 Buat Pesanan Baru</h2>
+     <form id="orderForm" class="space-y-5">
+      <div><label for="namaPemesan" id="nameLabel" class="block text-sm font-semibold text-gray-700 mb-2">Nama Pemesan</label> <input type="text" id="namaPemesan" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" placeholder="Masukkan nama Anda">
+      </div>
+      <div><label for="nomorWAPembeli" class="block text-sm font-semibold text-gray-700 mb-2">Nomor WhatsApp Pembeli <span class="text-gray-500 text-xs">(Opsional)</span></label> <input type="tel" id="nomorWAPembeli" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" placeholder="Contoh: 62812345678 (tanpa +)">
+      </div>
+      <div><label for="jenisPesanan" id="typeLabel" class="block text-sm font-semibold text-gray-700 mb-2">Jenis Pesanan</label> <select id="jenisPesanan" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors bg-white"> <option value="">Pilih jenis pesanan</option> <option value="Telur">Telur</option> <option value="Ayam">Ayam</option> <option value="DOC">Pre Order DOC</option> </select>
+      </div>
+      <div><label for="banyakPesanan" id="quantityLabel" class="block text-sm font-semibold text-gray-700 mb-2">Banyak Pesanan</label> <input type="number" id="banyakPesanan" required min="1" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 transition-colors" placeholder="Masukkan jumlah">
+      </div>
+      <div><label for="satuan" class="block text-sm font-semibold text-gray-700 mb-2">Satuan</label> <input type="text" id="satuan" readonly class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600" placeholder="Otomatis terisi">
+      </div><button type="submit" id="submitBtn" class="w-full py-4 rounded-xl font-bold text-white text-lg transition-all duration-300 shadow-lg hover:shadow-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> <span id="submitBtnText">✅ Kirim Pesanan</span> <span id="submitBtnSpinner" class="spinner hidden mx-auto"></span> </button>
+     </form>
+    </div><!-- Orders List Card -->
+    <div class="glass-effect rounded-3xl shadow-2xl p-6 md:p-8 mb-8">
+     <div class="flex items-center justify-between mb-2">
+      <h2 class="text-lg font-bold" style="color: #667eea;">📋 Daftar Pesanan</h2><button id="refreshBtn" class="px-3 py-1.5 rounded-lg font-semibold text-white text-sm transition-all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 🔄 Refresh </button>
+     </div>
+     <p class="text-sm text-emerald-400 mb-2 italic font-bold">Pesanan akan dipenuhi berdasarkan nomor urut pesanan dan ketersediaan produk. Terima kasih.</p>
+     <div id="ordersList" class="space-y-1.5">
+      <div class="text-center py-8 text-gray-500">
+       <div class="spinner mx-auto mb-3"></div> Memuat data...
+      </div>
+     </div>
+    </div><!-- Completed Orders List Card -->
+    <div class="glass-effect rounded-3xl shadow-2xl p-6 md:p-8">
+     <div class="flex items-center justify-between mb-2">
+      <h2 class="text-lg font-bold" style="color: #667eea;">📦 Pesanan Selesai Terbaru</h2><button id="refreshCompletedBtn" class="px-3 py-1.5 rounded-lg font-semibold text-white text-sm transition-all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 🔄 Refresh </button>
+     </div>
+     <p id="completedOrdersDescription" class="class="text-sm text-emerald-400 mb-2 italic font-bold">Daftar pesanan yang telah selesai diproses dan diserahkan kepada pelanggan.</p>
+     <div id="completedOrdersList" class="space-y-1.5">
+      <div class="text-center py-8 text-gray-500">
+       <div class="spinner mx-auto mb-3"></div> Memuat data...
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec';
+    const STOCK_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Stok';
+    const PRICE_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Harga';
+    const COMPLETED_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Pesanan%20Selesai';
+    
+    // ===== KONFIGURASI FONNTE =====
+    // Ganti dengan token dari Fonnte Dashboard Anda
+    const FONNTE_TOKEN = 'YqaCeEMuscd9d4RbQmks'; // UBAH INI!
+    const FONNTE_API = 'https://api.fonnte.com/send';
+
+    // ===== KONFIGURASI WHATSAPP PEMILIK =====
+    // Ganti dengan nomor WhatsApp Anda (format: 62812345678, tanpa +)
+    const WHATSAPP_NUMBER = '6289628917804'; // UBAH INI DENGAN NOMOR ANDA!
+
+    const defaultConfig = {
+      page_title: 'Form Pemesanan',
+      info_title: 'Info Produk',
+      info_description: 'Produk yang dijual adalah produk dari Ayam Kampung, yaitu telur, daging ayam utuh, dan DOC.',
+      info_price_1: 'Harga telur: Rp 2.500,- per butir',
+      info_price_2: 'Harga daging ayam: Rp 60.000,- per kg',
+      info_price_3: 'Harga DOC: Rp 5.000,- per ekor',
+      name_label: 'Nama Pemesan',
+      type_label: 'Jenis Pesanan',
+      quantity_label: 'Banyak Pesanan',
+      submit_button: '✅ Kirim Pesanan',
+      primary_color: '#667eea',
+      secondary_color: '#764ba2',
+      background_color: '#f8f9fa',
+      text_color: '#1f2937',
+      surface_color: '#ffffff'
+    };
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // ===== FUNGSI KIRIM KE PEMBELI VIA FONNTE =====
+    async function kirimWAPembeli(nomorWA, nama, jenis, jumlah, satuan) {
+      const message = `Halo ${nama}! 👋
+
+Terima kasih telah memesan di Kristant Farm! ✨
+
+📦 *Detail Pesanan Anda:*
+• Produk: ${jenis}
+• Jumlah: ${jumlah} ${satuan}
+
+Kami akan segera memproses pesanan Anda.
+Silakan tunggu konfirmasi lebih lanjut.
+
+Terima kasih! 🙏`;
+
+      try {
+        const response = await fetch(FONNTE_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': FONNTE_TOKEN
+          },
+          body: JSON.stringify({
+            target: nomorWA,
+            message: message,
+            countryCode: '62'
+          })
+        });
+
+        const data = await response.json();
+        console.log('Pesan terkirim ke pembeli:', data);
+        return data;
+      } catch (error) {
+        console.error('Gagal kirim ke pembeli:', error);
+      }
+    }
+
+    // ===== FUNGSI KIRIM KE PEMILIK VIA WA.ME =====
+    function sendToWhatsApp(nama, jenis, jumlah, satuan, tanggal) {
+      const message = `
+*🎉 ADA PESANAN BARU! 🎉*
+
+*Nama Pemesan:* ${nama}
+*Jenis Produk:* ${jenis}
+*Jumlah:* ${jumlah} ${satuan}
+*Tanggal Pesanan:* ${tanggal}
+
+---
+Silakan proses pesanan ini. Terima kasih!
+      `.trim();
+
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank', 'width=800,height=600');
+    }
+
+    async function loadPrices() {
+      try {
+        const response = await fetch(PRICE_URL);
+        const data = await response.json();
+
+        if (data.length < 2) {
+          return;
+        }
+
+        // Ambil harga dari BARIS KE-2 (index 1)
+        // Kolom 3 (index 2) = Harga Telur
+        // Kolom 4 (index 3) = Harga Ayam
+        // Kolom 5 (index 4) = Harga DOC
+        const row = data[1]; // Baris ke-2
+        const hargaTelur = row.col3 || row[Object.keys(row)[2]] || 'Rp 2.500,- per butir';
+        const hargaAyam = row.col4 || row[Object.keys(row)[3]] || 'Rp 60.000,- per kg';
+        const hargaDOC = row.col5 || row[Object.keys(row)[4]] || 'Rp 5.000,- per ekor';
+
+        // Update info content dengan harga dari sheet
+        const infoContent = document.getElementById('infoContent');
+        const infoDesc = defaultConfig.info_description;
+        
+        infoContent.innerHTML = `
+          <p class="text-sm text-gray-700 leading-relaxed mb-3">${infoDesc}</p>
+          <p class="text-sm leading-relaxed">
+            <span style="color: #d97706; font-weight: 600;"><strong>Harga telur</strong> ${hargaTelur}</span>. 
+            <span style="color: #16a34a; font-weight: 600;"><strong>Harga daging ayam</strong> ${hargaAyam} dengan <strong>berat ayam minimal 1 kg</strong> dan <strong>ayam ditimbang saat masih hidup</strong></span>. 
+            <span style="color: #2563eb; font-weight: 600;"><strong>Harga DOC</strong> ${hargaDOC}. <strong>DOC</strong> (anak ayam baru menetas) dengan <strong>harga berbeda untuk umur lebih dari 7 hari</strong></span>.
+          </p>
+        `;
+      } catch (error) {
+        console.error('Gagal memuat data harga:', error);
+      }
+    }
+
+    async function loadStock() {
+      try {
+        const response = await fetch(STOCK_URL);
+        const data = await response.json();
+        
+        const stockInfo = document.getElementById('stockInfo');
+        stockInfo.innerHTML = '';
+
+        if (data.length < 4) {
+          stockInfo.innerHTML = '<div class="text-xs text-gray-500">Data stok tidak tersedia</div>';
+          return;
+        }
+
+        // Ambil data dari baris ke-4 (index 3)
+        const stockRow = data[3];
+        const stokTelur = stockRow.col3 || stockRow[Object.keys(stockRow)[2]] || 0;
+        const stokAyam = stockRow.col4 || stockRow[Object.keys(stockRow)[3]] || 0;
+        const stokDOC = stockRow.col5 || stockRow[Object.keys(stockRow)[4]] || 0;
+
+        const stockList = document.createElement('div');
+        stockList.className = 'space-y-1.5';
+        
+        // Stok Telur
+        const telurColor = stokTelur > 50 ? 'text-green-700' : stokTelur > 20 ? 'text-yellow-700' : 'text-red-700';
+        stockList.innerHTML += `
+          <div class="flex items-center justify-between bg-white bg-opacity-70 p-2 rounded-lg border border-gray-200">
+            <span class="text-xs font-semibold text-gray-700">Stok Telur:</span>
+            <span class="text-xs font-bold ${telurColor}">${stokTelur} butir</span>
+          </div>
+        `;
+        
+        // Stok Ayam
+        const ayamColor = stokAyam > 50 ? 'text-green-700' : stokAyam > 20 ? 'text-yellow-700' : 'text-red-700';
+        stockList.innerHTML += `
+          <div class="flex items-center justify-between bg-white bg-opacity-70 p-2 rounded-lg border border-gray-200">
+            <span class="text-xs font-semibold text-gray-700">Stok Ayam:</span>
+            <span class="text-xs font-bold ${ayamColor}">${stokAyam} ekor</span>
+          </div>
+        `;
+        
+        // Stok DOC
+        const docColor = stokDOC > 50 ? 'text-green-700' : stokDOC > 20 ? 'text-yellow-700' : 'text-red-700';
+        stockList.innerHTML += `
+          <div class="flex items-center justify-between bg-white bg-opacity-70 p-2 rounded-lg border border-gray-200">
+            <span class="text-xs font-semibold text-gray-700">Stok DOC:</span>
+            <span class="text-xs font-bold ${docColor}">${stokDOC} ekor</span>
+          </div>
+        `;
+        
+        stockInfo.appendChild(stockList);
+      } catch (error) {
+        const stockInfo = document.getElementById('stockInfo');
+        stockInfo.innerHTML = '<div class="text-xs text-red-500">Gagal memuat data stok</div>';
+      }
+    }
+
+
+    function formatTanggal(tanggal) {
+      if (!tanggal || tanggal === '-') return '-';
+      
+      // Jika sudah format DD/MM/YYYY, return as is
+      if (typeof tanggal === 'string' && tanggal.includes('/')) {
+        return tanggal;
+      }
+      
+      // Jika format ISO (2026-01-19T17:00:00.000Z), convert ke DD/MM/YYYY
+      try {
+        const date = new Date(tanggal);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      } catch (e) {
+        return tanggal;
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const response = await fetch(WEB_APP_URL);
+        const data = await response.json();
+        
+        const ordersList = document.getElementById('ordersList');
+        ordersList.innerHTML = '';
+
+        if (data.length === 0) {
+          ordersList.innerHTML = '<div class="text-center py-8 text-gray-500">Belum ada data pesanan</div>';
+          return;
+        }
+
+        // Urutkan data dari nomor terkecil ke terbesar (no 1 di atas)
+        const sortedData = data.sort((a, b) => (a.no || 0) - (b.no || 0));
+        const displayData = sortedData.slice(0, 5);
+        
+        displayData.forEach((row, index) => {
+          const orderItem = document.createElement('div');
+          orderItem.className = 'p-1.5 bg-white bg-opacity-60 rounded-lg hover:bg-opacity-80 transition-all border border-gray-200';
+          
+          const statusClass = row.status === 'Selesai' ? 'status-selesai' : 
+                            row.status === 'Proses' ? 'status-proses' : 'status-pending';
+          
+          const no = row.no || index + 1;
+          const nama = row.nama || '-';
+          const jenis = row.jenis || '-';
+          const jumlah = row.jumlah || '-';
+          const satuan = row.satuan || '-';
+          const tanggal = formatTanggal(row.tanggal);
+          const status = row.status || 'Pending';
+          
+          orderItem.innerHTML = `
+            <p class="text-gray-700 text-sm leading-snug">
+              <strong>${no}.</strong> <strong>${nama}</strong> pesan <strong>${jenis}</strong> <strong>${jumlah}</strong> ${satuan} pada tanggal <strong>${tanggal}</strong>. 
+              Status: <span class="status-badge ${statusClass}">${status}</span>
+            </p>
+          `;
+          ordersList.appendChild(orderItem);
+        });
+
+        // Tampilkan keterangan jika ada lebih dari 5 pesanan
+        if (sortedData.length > 5) {
+          const remainingCount = sortedData.length - 5;
+          const noticeItem = document.createElement('div');
+          noticeItem.className = 'p-3 bg-blue-50 bg-opacity-80 rounded-lg border border-blue-200 mt-3';
+          noticeItem.innerHTML = `
+            <p class="text-blue-700 text-sm font-semibold text-center">
+              ℹ️ Masih ada ${remainingCount} pesanan baru berikutnya
+            </p>
+          `;
+          ordersList.appendChild(noticeItem);
+        }
+      } catch (error) {
+        const ordersList = document.getElementById('ordersList');
+        ordersList.innerHTML = '<div class="text-center py-8 text-red-500">Gagal memuat data. Silakan coba lagi.</div>';
+      }
+    }
+
+    async function loadCompletedOrders() {
+      try {
+        const response = await fetch(COMPLETED_URL);
+        const data = await response.json();
+        
+        console.log('Data Pesanan Selesai:', data); // Debug untuk melihat struktur data
+        console.log('Jumlah data:', data.length); // Debug jumlah data
+        
+        const completedOrdersList = document.getElementById('completedOrdersList');
+        const completedOrdersDescription = document.getElementById('completedOrdersDescription');
+        completedOrdersList.innerHTML = '';
+
+        // Langsung gunakan data dari server (sudah difilter di Google Apps Script)
+        console.log('Jumlah data valid:', data.length);
+
+        if (data.length === 0) {
+          completedOrdersList.innerHTML = '<div class="text-center py-8 text-gray-500">Belum ada pesanan selesai</div>';
+          completedOrdersDescription.textContent = 'Daftar pesanan yang telah selesai diproses dan diserahkan kepada pelanggan.';
+          return;
+        }
+
+        // Update deskripsi dengan jumlah total data
+        completedOrdersDescription.textContent = `Daftar pesanan yang telah selesai diproses dan diserahkan kepada pelanggan sebanyak ${data.length} pesanan.`;
+        
+        const validData = data;
+
+        // Urutkan data dari nomor terkecil ke terbesar (no 1 di atas)
+        const sortedData = validData.sort((a, b) => {
+          const aNo = parseInt(a.col1) || 0;
+          const bNo = parseInt(b.col1) || 0;
+          return aNo - bNo;
+        });
+        // Ambil 5 data terakhir saja
+        const displayData = sortedData.slice(-5);
+        
+        displayData.forEach((row, index) => {
+          const orderItem = document.createElement('div');
+          orderItem.className = 'p-1.5 bg-white bg-opacity-60 rounded-lg hover:bg-opacity-80 transition-all border border-gray-200';
+          
+          // Membaca dari sheet "Pesanan Selesai" dengan format col1, col2, col3, dst
+          // Nomor urut dimulai dari 1, 2, 3, 4, 5
+          const no = index + 1;
+          const nama = row.col2 || '-';
+          const jenis = row.col3 || '-';
+          const jumlah = row.col4 || '-';
+          const satuan = row.col5 || '-';
+          const tanggal = formatTanggal(row.col6);
+          
+          orderItem.innerHTML = `
+            <p class="text-gray-700 text-sm leading-snug">
+              <strong>${no}.</strong> <strong>${nama}</strong> pesan <strong>${jenis}</strong> <strong>${jumlah}</strong> ${satuan} pada tanggal <strong>${tanggal}</strong>. 
+              Status: <span class="status-badge status-selesai">Pesanan telah diselesaikan. Semoga puas dengan layanan kami. Terima kasih.</span>
+            </p>
+          `;
+          completedOrdersList.appendChild(orderItem);
+        });
+      } catch (error) {
+        console.error('Error loading completed orders:', error);
+        const completedOrdersList = document.getElementById('completedOrdersList');
+        completedOrdersList.innerHTML = '<div class="text-center py-8 text-red-500">Gagal memuat data. Silakan coba lagi.</div>';
+      }
+    }
+
+    document.getElementById('jenisPesanan').addEventListener('change', function(e) {
+      const satuan = document.getElementById('satuan');
+      const jenis = e.target.value;
+      
+      if (jenis === 'Telur') {
+        satuan.value = 'butir';
+      } else if (jenis === 'Ayam' || jenis === 'DOC') {
+        satuan.value = 'ekor';
+      } else {
+        satuan.value = '';
+      }
+    });
+
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const submitBtnText = document.getElementById('submitBtnText');
+      const submitBtnSpinner = document.getElementById('submitBtnSpinner');
+      
+      submitBtn.disabled = true;
+      submitBtnText.classList.add('hidden');
+      submitBtnSpinner.classList.remove('hidden');
+
+      const nama = document.getElementById('namaPemesan').value;
+      const jenis = document.getElementById('jenisPesanan').value;
+      const jumlah = document.getElementById('banyakPesanan').value;
+      const satuan = document.getElementById('satuan').value;
+      const nomorWA = document.getElementById('nomorWAPembeli').value.trim(); // Ambil nomor WA
+
+      const formData = new URLSearchParams();
+      formData.append('nama', nama);
+      formData.append('jenis', jenis);
+      formData.append('jumlah', jumlah);
+      formData.append('satuan', satuan);
+      
+      const tanggalLokal = new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'Asia/Jakarta'
+      }).format(new Date());
+
+      formData.append('tanggal', tanggalLokal);
+
+      try {
+        // 1. Simpan ke database
+        const response = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        // 2. KIRIM NOTIFIKASI KE PEMBELI VIA FONNTE (HANYA JIKA ADA NOMOR WA)
+        if (nomorWA && nomorWA !== '') {
+          await kirimWAPembeli(nomorWA, nama, jenis, jumlah, satuan);
+          showToast('Pesanan & notifikasi WA terkirim! ✅', 'success');
+        } else {
+          showToast('Pesanan diterima (tanpa notifikasi WA)! ✅', 'success');
+        }
+
+        // 3. KIRIM NOTIFIKASI KE PEMILIK VIA WA.ME (SELALU DIKIRIM)
+        sendToWhatsApp(nama, jenis, jumlah, satuan, tanggalLokal);
+
+        document.getElementById('orderForm').reset();
+        
+        setTimeout(() => {
+          loadOrders();
+        }, 1500);
+
+      } catch (error) {
+        showToast('Terjadi kesalahan. Silakan coba lagi.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtnText.classList.remove('hidden');
+        submitBtnSpinner.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      loadOrders();
+      showToast('Data berhasil diperbarui! 🔄', 'success');
+    });
+
+    document.getElementById('refreshCompletedBtn').addEventListener('click', function() {
+      loadCompletedOrders();
+      showToast('Data pesanan selesai diperbarui! 🔄', 'success');
+    });
+
+    document.getElementById('refreshStockBtn').addEventListener('click', function() {
+      loadStock();
+      showToast('Data stok berhasil diperbarui! 🔄', 'success');
+    });
+
+    async function onConfigChange(config) {
+      const pageTitle = document.getElementById('pageTitle');
+      const infoTitle = document.getElementById('infoTitle');
+      const nameLabel = document.getElementById('nameLabel');
+      const typeLabel = document.getElementById('typeLabel');
+      const quantityLabel = document.getElementById('quantityLabel');
+      const submitBtnText = document.getElementById('submitBtnText');
+
+      pageTitle.textContent = config.page_title || defaultConfig.page_title;
+      infoTitle.textContent = '📋 ' + (config.info_title || defaultConfig.info_title);
+      nameLabel.textContent = config.name_label || defaultConfig.name_label;
+      typeLabel.textContent = config.type_label || defaultConfig.type_label;
+      quantityLabel.textContent = config.quantity_label || defaultConfig.quantity_label;
+      submitBtnText.textContent = config.submit_button || defaultConfig.submit_button;
+
+      // Update info content
+      const infoContent = document.getElementById('infoContent');
+      const infoDesc = config.info_description || defaultConfig.info_description;
+      const price1 = config.info_price_1 || defaultConfig.info_price_1;
+      const price2 = config.info_price_2 || defaultConfig.info_price_2;
+      const price3 = config.info_price_3 || defaultConfig.info_price_3;
+      
+      infoContent.innerHTML = `
+        <p class="text-sm text-gray-700 leading-relaxed mb-3">${infoDesc}</p>
+        <p class="text-sm leading-relaxed">
+          <span style="color: #d97706; font-weight: 600;"><strong>${price1.split(':')[0]}</strong> ${price1.split(':')[1] || price1}</span>. 
+          <span style="color: #16a34a; font-weight: 600;"><strong>${price2.split(':')[0]}</strong> ${price2.split(':')[1] || price2} dengan <strong>berat ayam minimal 1 kg</strong> dan <strong>ayam ditimbang saat masih hidup</strong></span>. 
+          <span style="color: #2563eb; font-weight: 600;"><strong>${price3.split(':')[0]}</strong> ${price3.split(':')[1] || price3}. <strong>DOC</strong> (anak ayam baru menetas) dengan <strong>harga berbeda untuk umur lebih dari 7 hari</strong></span>.
+        </p>
+      `;
+
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+
+      document.body.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      document.querySelectorAll('h2').forEach(h2 => {
+        h2.style.color = primaryColor;
+      });
+      document.querySelectorAll('button[type="submit"], #refreshBtn, #refreshCompletedBtn').forEach(btn => {
+        btn.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      });
+      document.querySelectorAll('thead tr').forEach(tr => {
+        tr.style.borderColor = primaryColor;
+      });
+      document.querySelectorAll('input:focus, select:focus').forEach(input => {
+        input.style.borderColor = primaryColor;
+      });
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['page_title', config.page_title || defaultConfig.page_title],
+          ['info_title', config.info_title || defaultConfig.info_title],
+          ['info_description', config.info_description || defaultConfig.info_description],
+          ['info_price_1', config.info_price_1 || defaultConfig.info_price_1],
+          ['info_price_2', config.info_price_2 || defaultConfig.info_price_2],
+          ['info_price_3', config.info_price_3 || defaultConfig.info_price_3],
+          ['name_label', config.name_label || defaultConfig.name_label],
+          ['type_label', config.type_label || defaultConfig.type_label],
+          ['quantity_label', config.quantity_label || defaultConfig.quantity_label],
+          ['submit_button', config.submit_button || defaultConfig.submit_button]
+        ])
+      });
+    }
+
+    loadOrders();
+    loadStock();
+    loadPrices();
+    loadCompletedOrders();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c20680bb5bfff95',t:'MTc2OTA5OTExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
