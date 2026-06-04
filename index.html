@@ -237,7 +237,7 @@
       // Jika pembeli isi nomor, gabung dengan "62", jika tidak isi default "-"
       const nomorWADisplay = nomorWAPembeli && nomorWAPembeli.trim() !== '' ? '+62' + nomorWAPembeli : '-';
       
-      const message = `*🎉 KRISTANT FARM, ADA PESANAN BARU! 🎉*
+      const message = `*🎉ADA PESANAN BARU!🎉*
 
 *Nama Pemesan:* ${nama}
 *Nomor WA Pembeli:* ${nomorWADisplay}
@@ -273,7 +273,7 @@ Mohon segera diproses`;
     // ===== FUNGSI KIRIM KE PEMBELI VIA FONNTE =====
     async function kirimNotifikasiKePembeli(nomorWAPembeli, nama, jenis, jumlah, satuan) {
       // Gabung dengan "62" untuk nomor lengkap
-      const nomorWALengkap = '62' + nomorWAPembeli;
+      const nomorWALengkap = '+62' + nomorWAPembeli;
       
       const message = `Halo ${nama}! 👋
 
