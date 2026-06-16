@@ -193,7 +193,7 @@
    </div>
   </div>
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx7uTn2NdgPSbsWK66PoImk6kq69cFgJMAT3fEIkh1x7pq6zRQgEdeOXLk9flyNvZUlbQ/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyXG4CyWOxpX-VupkXaaVQdP2lSLC8LlYeeUlu0WNDZTOgcbH9aXuxvkGDof5vBlSn1YA/exec';
     const STOCK_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Stok';
     const PRICE_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Harga';
     const COMPLETED_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Pesanan%20Selesai';
@@ -716,28 +716,34 @@ Terima kasih!
     loadStock();
     loadPrices();
     loadCompletedOrders();
-    // ===== TEMPATKAN KODE BARU KAMU DI SINI (Sebelum script pertama ditutup) =====
-        function fetchCredentialsFromServer() {
-          if (typeof google !== 'undefined' && google.script && google.script.run) {
-            google.script.run
-              .withSuccessHandler(function(credentials) {
-                if (credentials && credentials.token && credentials.noWa) {
-                  FONNTE_TOKEN = credentials.token;
-                  PEMILIK_NOMOR = credentials.noWa;
-                  console.log('Kredensial Fonnte berhasil dimuat dari Spreadsheet.');
-                } else {
-                  showToast('Gagal memuat token WA. Periksa Sheet Token dan NoWA.', 'error');
-                }
-              })
-              .withFailureHandler(function(error) {
-                console.error('Gagal terhubung ke GAS Server:', error);
-              })
-              .getFonnteCredentials();
-          }
-        }
 
-        // Jalankan langsung agar token terisi saat web dibuka
-        fetchCredentialsFromServer();
+
+    // ===== TEMPATKAN KODE BARU KAMU DI SINI (Sebelum script pertama ditutup) =====
+            // ===== FUNGSI AMAN MENGAMBIL KREDENSIAL DARI SPREADSHEET VIA FETCH =====
+    async function fetchCredentialsFromServer() {
+      // Menggunakan URL Web App milik Anda yang ditambahkan parameter sheet=Credentials
+      const CREDENTIALS_URL = WEB_APP_URL + '?sheet=Credentials';
+      
+      try {
+        const response = await fetch(CREDENTIALS_URL);
+        const credentials = await response.json();
+        
+        // PERBAIKAN: Langsung membaca token dan noWa dari objek utama
+        if (credentials && credentials.token && credentials.noWa) {
+          FONNTE_TOKEN = credentials.token;
+          PEMILIK_NOMOR = credentials.noWa;
+          console.log('Kredensial Fonnte berhasil dimuat secara aman dari server.');
+        } else {
+          showToast('Gagal memuat token WA. Periksa Sheet Token dan NoWA.', 'error');
+        }
+      } catch (error) {
+        console.error('Gagal terhubung ke URL Kredensial:', error);
+      }
+    }
+
+    // Jalankan langsung agar token terisi saat web dibuka
+    fetchCredentialsFromServer();
+
 
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c20680bb5bfff95',t:'MTc2OTA5OTExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
