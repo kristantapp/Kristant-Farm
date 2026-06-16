@@ -193,15 +193,16 @@
    </div>
   </div>
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzEdhslHP6kFM2UeCIpS-yIKKn4Y8TqivJ6CX8B5cMG6OSdS2f8LIYdMaIk7eIp0vlvwg/exec';
     const STOCK_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Stok';
     const PRICE_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Harga';
     const COMPLETED_URL = 'https://script.google.com/macros/s/AKfycbxfg2SNmxdlJl2oF_bz0doNd6cKGN3LlqPpHZ3fvQc4_--0uIAZJM30yiMvMARb_j0kkQ/exec?sheet=Pesanan%20Selesai';
     
-    // ===== KONFIGURASI FONNTE =====
-    const FONNTE_TOKEN = 'kode-token'; // UBAH INI DENGAN TOKEN FONNTE ANDA!
+        // ===== KONFIGURASI FONNTE =====
+    let FONNTE_TOKEN = ''; // UBAH MENJADI SEPERTI INI (let dan kosong)
     const FONNTE_API = 'https://api.fonnte.com/send';
-    const PEMILIK_NOMOR = 'wa-pemilik'; // UBAH INI DENGAN NOMOR WA ANDA!
+    let PEMILIK_NOMOR = ''; // UBAH MENJADI SEPERTI INI (let dan kosong)
+
 
     const defaultConfig = {
       page_title: 'Form Pemesanan',
@@ -715,6 +716,29 @@ Terima kasih!
     loadStock();
     loadPrices();
     loadCompletedOrders();
-  </script>
+    // ===== TEMPATKAN KODE BARU KAMU DI SINI (Sebelum script pertama ditutup) =====
+        function fetchCredentialsFromServer() {
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler(function(credentials) {
+                if (credentials && credentials.token && credentials.noWa) {
+                  FONNTE_TOKEN = credentials.token;
+                  PEMILIK_NOMOR = credentials.noWa;
+                  console.log('Kredensial Fonnte berhasil dimuat dari Spreadsheet.');
+                } else {
+                  showToast('Gagal memuat token WA. Periksa Sheet Token dan NoWA.', 'error');
+                }
+              })
+              .withFailureHandler(function(error) {
+                console.error('Gagal terhubung ke GAS Server:', error);
+              })
+              .getFonnteCredentials();
+          }
+        }
+
+        // Jalankan langsung agar token terisi saat web dibuka
+        fetchCredentialsFromServer();
+
+    </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c20680bb5bfff95',t:'MTc2OTA5OTExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
